@@ -33,4 +33,13 @@ app.use(express.static("public"));
 // Middleware to parse cookies from incoming requests
 app.use(cookieParser());
 
+// routes import
+import userRouter from "./routes/user.route.js";
+
+// decalring routes
+// if we are using the direct route like app.get("/api/v1/users", userRouter); we will use app.get
+
+// but we are using routes from the express router so we will use app.use middleware
+app.use("/api/v1/users", userRouter);
+
 export { app };
