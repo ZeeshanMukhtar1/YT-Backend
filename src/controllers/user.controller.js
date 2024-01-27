@@ -6,15 +6,15 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 // custom method for generating access token and refresh token
 const generateAccessTokenAndRefreshToken = async (userId) => {
-  const user = await User.findById(userId);
-  const accessToken = user.generateAccessToken();
-  refreshToken = user.generateRefreshToken();
-  // saving the refresh token in the database
-  user.refreshToken = refreshToken; // injecting the value of refresh token in the user object
-  await user.save({ validateBeforeSave: false });
-  // we will give both the tokens to the user
-  return { accessToken, refreshToken };
   try {
+    const user = await User.findById(userId);
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken(); // Declare refreshToken with const
+    // saving the refresh token in the database
+    user.refreshToken = refreshToken; // injecting the value of refresh token in the user object
+    await user.save({ validateBeforeSave: false });
+    // we will give both the tokens to the user
+    return { accessToken, refreshToken };
   } catch (error) {
     throw new ApiError(500, "Token generation failed");
   }
@@ -107,49 +107,41 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, createdUser, "User created successfully"));
 });
 
-// login user method
-// Access token are short lived and refresh token are long lived
 const loginUser = asyncHandler(async (req, res) => {
-  // login user algorithm
-  // get crendentials from req.body (email or usernam)
-  // find that user
-  // check password of that user
-  // if password is correct then generate access token and refresh token
-  // send cookies to the user
+  // req body -> data
+  // username or email
+  //find the user
+  //password check
+  //access and referesh token
+  //send cookie
 
-  const { email, password } = req.body;
-  if (!email || !username) {
-    throw new ApiError(400, "Email or username are required");
+  const { email, username, password } = req.body;
+  console.log(email);
+
+  if (!username && !email) {
+    throw new ApiError(400, "username or email is required");
   }
 
-  // finding user by email or username programatically
-  const user = await User.findOne([
-    {
-      $or: [{ email }, { username }],
-    },
-  ]);
+  const user = await User.findOne({
+    $or: [{ username }, { email }],
+  });
 
-  // checking for user existence
   if (!user) {
-    throw new ApiError(404, "User not found");
+    throw new ApiError(404, "User does not exist");
   }
 
-  // check for password if user found successfully
   const isPasswordValid = await user.isPasswordCorrect(password);
+
   if (!isPasswordValid) {
-    throw new ApiError(401, "Invalid credentials");
+    throw new ApiError(401, "Invalid user credentials");
   }
 
-  // getting access token and refresh token by calling the custom method
   const { accessToken, refreshToken } =
     await generateAccessTokenAndRefreshToken(user._id);
 
-  // sending the cookies to the user
   const loggedInUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
-
-  // updating cokies policy so that user cant modifie the cookies (only server can edit it)
 
   const options = {
     httpOnly: true,
@@ -168,7 +160,7 @@ const loginUser = asyncHandler(async (req, res) => {
           accessToken,
           refreshToken,
         },
-        "User logged in successfully"
+        "User logged In Successfully"
       )
     );
 });
@@ -184,7 +176,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     req.user._id,
     {
       $set: {
-        refreshToke: undefined,
+        refreshToken: undefined,
       },
     },
     {
