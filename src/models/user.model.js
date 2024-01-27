@@ -67,7 +67,7 @@ userSchema.pre("save", async function (next) {
 // });
 
 // comparing the user given password with then encrypted  password in the database
-userSchema.methods.isPasswordcorrect = async function (password) {
+userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
   // it will return true or false
 };
