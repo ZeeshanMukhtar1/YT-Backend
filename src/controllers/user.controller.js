@@ -4,6 +4,23 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+// custom method for generating access token and refresh token
+const generateAccessTokenAndRefreshToken = async (userId) => {
+  const user = await User.findById(userId);
+  const accessToken = user.generateAccessToken();
+  refreshToken = user.generateRefreshToken();
+  // saving the refresh token in the database
+  user.refreshToken = refreshToken; // injecting the value of refresh token in the user object
+  await user.save({ validateBeforeSave: false });
+  // we will give both the tokens to the user
+  return { accessToken, refreshToken };
+  try {
+  } catch (error) {
+    throw new ApiError(500, "Token generation failed");
+  }
+};
+
+// register user
 const registerUser = asyncHandler(async (req, res) => {
   // get user details from frontend
   // validation - not empty
@@ -90,4 +107,98 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, createdUser, "User created successfully"));
 });
 
-export { registerUser };
+// login user method
+// Access token are short lived and refresh token are long lived
+const loginUser = asyncHandler(async (req, res) => {
+  // login user algorithm
+  // get crendentials from req.body (email or usernam)
+  // find that user
+  // check password of that user
+  // if password is correct then generate access token and refresh token
+  // send cookies to the user
+
+  const { email, password } = req.body;
+  if (!email || !username) {
+    throw new ApiError(400, "Email or username are required");
+  }
+
+  // finding user by email or username programatically
+  const user = await User.findOne([
+    {
+      $or: [{ email }, { username }],
+    },
+  ]);
+
+  // checking for user existence
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // check for password if user found successfully
+  const isPasswordValid = await user.isPasswordCorrect(password);
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid credentials");
+  }
+
+  // getting access token and refresh token by calling the custom method
+  const { accessToken, refreshToken } =
+    await generateAccessTokenAndRefreshToken(user._id);
+
+  // sending the cookies to the user
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  // updating cokies policy so that user cant modifie the cookies (only server can edit it)
+
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        200,
+        {
+          user: loggedInUser,
+          accessToken,
+          refreshToken,
+        },
+        "User logged in successfully"
+      )
+    );
+});
+
+const logoutUser = asyncHandler(async (req, res) => {
+  // algorithm
+  // get refresh token from req.cookies
+  // find user by refresh token
+  // if user found then remove refresh token from db
+  // send response
+  // clear cookies from the browser
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        refreshToke: undefined,
+      },
+    },
+    {
+      new: true,
+    }
+  );
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User logged out successfully"));
+});
+export { registerUser, loginUser, logoutUser };
