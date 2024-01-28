@@ -196,7 +196,9 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken;
+  const incomingRefreshToken =
+    req.cookies.refreshToken || req.body.refreshToken; // <-- Declare the variable
+
   if (!incomingRefreshToken) {
     throw new ApiError(401, "unauthorized request - no token");
   }
@@ -217,7 +219,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "refresh token is expired - no match");
     }
 
-    const optins = {
+    const options = {
       httpOnly: true,
       secure: true,
     };

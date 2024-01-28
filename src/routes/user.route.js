@@ -33,11 +33,11 @@ router.route("/login").post(loginUser);
 // secure routes
 // router.route("/logout").post(logoutUser);
 router.route("/logout").post(verifyJwt, logoutUser);
-router.route("/refresh-token").post(refreshAccessToken);
 router.route("/change-password").post(verifyJwt, chnageCurrentPassword);
 router.route("/getCurrentUser").get(verifyJwt, getCurrentUser);
+router.route("/refresh-token").post(verifyJwt, refreshAccessToken);
 // router.route("/updateAccountDetails").post(verifyJwt, updateAccountDetails);
-// router.route("/updateUserAvatar").post(verifyJwt, updateUserAvatar);
 // router.route("/updatecoverImage").post(verifyJwt, updatecoverImage);
+// router.route("/updateUserAvatar").post(verifyJwt, updateUserAvatar);
 
 export default router;
