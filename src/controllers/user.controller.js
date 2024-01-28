@@ -365,6 +365,12 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Username is required");
     }
 
+    // 1st approch
+    // User.find({ username });
+
+    // 2nd approach using aggregation pipeline
+    // Note : aggregation return array of object [{},{},{}]
+
     // Use aggregation pipeline to retrieve channel information
     const channel = await User.aggregate([
       {
