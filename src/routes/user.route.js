@@ -2,6 +2,8 @@ import { Router } from "express";
 import {
   chnageCurrentPassword,
   getCurrentUser,
+  getUserChannelProfile,
+  getWatchHistory,
   loginUser,
   logoutUser,
   registerUser,
@@ -31,17 +33,22 @@ router.route("/register").post(
 router.route("/login").post(loginUser);
 
 // secure routes
-// router.route("/logout").post(logoutUser);
 router.route("/logout").post(verifyJwt, logoutUser);
 router.route("/change-password").post(verifyJwt, chnageCurrentPassword);
 router.route("/current-user").get(verifyJwt, getCurrentUser);
-router.route("/refresh-token").post(verifyJwt, refreshAccessToken);
-// router.route("/update-account").patch(verifyJwt, updateAccountDetails);
+router.route("/refresh-token").post(refreshAccessToken);
+router.route("/update-account").patch(verifyJwt, updateAccountDetails);
+
+// using multiple middlewares (verifyJwt, multer)
 router
   .route("/avatar")
   .patch(verifyJwt, upload.single("avatar"), updateUserAvatar);
 router
   .route("/cover-image")
   .patch(verifyJwt, upload.single("coverImage"), updatecoverImage);
+
+router.route("/c/:username").get(verifyJwt, getUserChannelProfile);
+
+router.route("/history").get(verifyJwt, getWatchHistory);
 
 export default router;
