@@ -1,4 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
+import mongoose from "mongoose";
+
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
@@ -355,6 +357,135 @@ const updatecoverImage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "cover image  updated successfully"));
 });
 
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  try {
+    // Extract the username from request parameters
+    const { username } = req.params;
+
+    // Validate if the username is provided
+    if (!username) {
+      throw new ApiError(400, "Username is required");
+    }
+
+    // 1st approch
+    // User.find({ username });
+
+    // 2nd approach using aggregation pipeline
+    // Note : aggregation return array of object [{},{},{}]
+
+    // Use aggregation pipeline to retrieve channel information
+    const channel = await User.aggregate([
+      {
+        // Stage 1: Match user with the provided username
+        $match: {
+          username: username.toLowerCase(),
+        },
+      },
+      {
+        // Stage 2: Lookup subscribers for the channel
+        $lookup: {
+          from: "subscriptions",
+          localField: "_id",
+          foreignField: "channels",
+          as: "subscribers",
+        },
+      },
+      {
+        // Stage 3: Lookup channels subscribed to by the user
+        $lookup: {
+          from: "subscriptions",
+          localField: "_id",
+          foreignField: "subcriber",
+          as: "subscribedTo",
+        },
+      },
+      {
+        // Stage 4: Add fields to the result document
+        $addFields: {
+          subscribersCount: { $size: "$subscribers" },
+          channelsSubscribedToCount: { $size: "$subscribedTo" },
+          isSubscribed: {
+            $in: [req.user._id, "$subscribers.subcriber"],
+          },
+        },
+      },
+      {
+        // Stage 5: Project only the necessary fields
+        $project: {
+          fullName: 1,
+          username: 1,
+          subscribersCount: 1,
+          channelsSubscribedToCount: 1,
+          isSubscribed: 1,
+          avatar: 1,
+          coverImage: 1,
+          email: 1,
+        },
+      },
+    ]);
+
+    // Check if the channel is found
+    if (!channel?.length) {
+      throw new ApiError(404, "Channel not found");
+    }
+
+    // Return the channel information in the response
+    return res
+      .status(200)
+      .json(new ApiResponse(200, channel[0], "Channel fetched successfully"));
+  } catch (error) {
+    // Handle any errors that occur during the process
+    throw new ApiError(500, error?.message || "Internal Server Error");
+  }
+});
+
+const getWatchHistory = asyncHandler(async (req, res) => {
+  try {
+    const user = await User.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(req.user._id),
+        },
+      },
+      {
+        $lookup: {
+          from: "videos",
+          localField: "watchHistory",
+          foreignField: "_id",
+          as: "watchHistory",
+          pipeline: [
+            {
+              $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+                pipeline: [
+                  { $project: { fullName: 1, username: 1, avatar: 1 } },
+                ],
+              },
+            },
+            {
+              $addFields: {
+                owner: { $first: "$owner" },
+              },
+            },
+          ],
+        },
+      },
+    ]);
+
+    // Check if watchHistory is present in the response
+    const watchHistory = user[0]?.watchHistory || [];
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, watchHistory, "Watch history fetched"));
+  } catch (error) {
+    throw new ApiError(500, error?.message || "Internal Server Error");
+  }
+});
+
 export {
   registerUser,
   loginUser,
@@ -365,4 +496,6 @@ export {
   updateAccountDetails,
   updateUserAvatar,
   updatecoverImage,
+  getUserChannelProfile,
+  getWatchHistory,
 };
