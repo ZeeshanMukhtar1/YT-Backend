@@ -34,10 +34,14 @@ router.route("/login").post(loginUser);
 // router.route("/logout").post(logoutUser);
 router.route("/logout").post(verifyJwt, logoutUser);
 router.route("/change-password").post(verifyJwt, chnageCurrentPassword);
-router.route("/getCurrentUser").get(verifyJwt, getCurrentUser);
+router.route("/current-user").get(verifyJwt, getCurrentUser);
 router.route("/refresh-token").post(verifyJwt, refreshAccessToken);
-// router.route("/updateAccountDetails").post(verifyJwt, updateAccountDetails);
-// router.route("/updatecoverImage").post(verifyJwt, updatecoverImage);
-// router.route("/updateUserAvatar").post(verifyJwt, updateUserAvatar);
+// router.route("/update-account").patch(verifyJwt, updateAccountDetails);
+router
+  .route("/avatar")
+  .patch(verifyJwt, upload.single("avatar"), updateUserAvatar);
+router
+  .route("/cover-image")
+  .patch(verifyJwt, upload.single("coverImage"), updatecoverImage);
 
 export default router;
