@@ -178,9 +178,14 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
       },
+
+      // easy approch but not recommended
+      // $set: {
+      //   refreshToken: undefined,
+      // },
     },
     {
       new: true,
@@ -435,7 +440,10 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, channel[0], "Channel fetched successfully"));
   } catch (error) {
     // Handle any errors that occur during the process
-    throw new ApiError(500, error?.message || "Internal Server Error");
+    // Send a user-friendly error response
+    return res
+      .status(500)
+      .json(new ApiResponse(500, null, "Internal Server Error"));
   }
 });
 
