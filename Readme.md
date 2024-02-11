@@ -18,11 +18,11 @@ Welcome to the MERN YouTube Backend, a modern and production-ready implementatio
 
 ## Getting Started
 
-To get started, simply clone the repository and run `npm install` to install the dependencies. Then, set up your environment variables and run `npm start` to start the server.
+To get started, simply clone the repository and run `npm install` to install the dependencies. Then, set up your environment variables and run `npm run dev` to start the server.
 
 ## Environment Variables
 
-The environment variables are stored in a .env file. You can find the .env.example file in the root directory of the project. Copy the .env.example file and create a .env file. Fill in the environment variables with your values.
+The environment variables are stored in a .env file. You can find the .env.sample file in the root directory of the project. Copy the .env.example file and create a .env file. Fill in the environment variables with your values.
 
 ## Contributing
 
@@ -34,17 +34,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgements
 
-- [Node.js](https://nodejs.org/)
-- [Express.js](https://expressjs.com/)
-- [MongoDB](https://www.mongodb.com/)
-- [Mongoose](https://mongoosejs.com/)
-- [Cloudinary](https://cloudinary.com/)
-- [Multer](https://www.npmjs.com/package/multer)
-- [bcrypt](https://www.npmjs.com/package/bcrypt)
-- [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)
-- [cors](https://www.npmjs.com/package/cors)
-- [dotenv](https://www.npmjs.com/package/dotenv)
-- [morgan](https://www.npmjs.com/package/morgan)
-- [nodemon](https://www.npmjs.com/package/nodemon)
-- [helmet](https://www.npmjs.com/package/helmet)
-- [mongoose aggregate paginate](https://www.npmjs.com/package/mongoose-aggregate-paginate-v2)
+- [Node.js](https://nodejs.org/) for the runtime environment
+- [Express.js](https://expressjs.com/) for Api development
+- [MongoDB](https://www.mongodb.com/) for the database
+- [Mongoose](https://mongoosejs.com/) for the ODM
+- [Cloudinary](https://cloudinary.com/) for file storage
+- [Multer](https://www.npmjs.com/package/multer) for file upload
+- [bcrypt](https://www.npmjs.com/package/bcrypt) for password hashing
+- [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) for token handling
+- [cors](https://www.npmjs.com/package/cors) for cross-origin resource sharing
+- [dotenv](https://www.npmjs.com/package/dotenv) for environment variables
+- [nodemon](https://www.npmjs.com/package/nodemon) for development
+- [mongoose aggregate paginate](https://www.npmjs.com/package/mongoose-aggregate-paginate-v2) for pagination
