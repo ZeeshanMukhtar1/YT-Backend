@@ -2,6 +2,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Tweet } from "../models/tweet.model.js";
+import { User } from "../models/user.model.js";
+import mongoose from "mongoose";
 
 const createTweet = asyncHandler(async (req, res, next) => {
   try {
@@ -26,7 +28,34 @@ const createTweet = asyncHandler(async (req, res, next) => {
   }
 });
 
-const getUserTweets = asyncHandler(async (req, res, next) => {});
+const getUserTweets = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    if (!userId)
+      throw new ApiError(401, "You do not have permission to Read Tweets");
+
+    const allTweets = await Tweet.find({
+      owner: new mongoose.Types.ObjectId(userId),
+    });
+
+    if (!allTweets || allTweets.length === 0) {
+      throw new ApiError(404, "No tweets found for this user");
+    }
+
+    const tweets = allTweets.map((tweet) => {
+      return {
+        tweet: tweet.content,
+        tweetId: tweet._id,
+        owner: tweet.owner,
+      };
+    });
+
+    return res.status(200).json(new ApiResponse(200, { tweets }, "Success"));
+  } catch (e) {
+    throw new ApiError(400, e.message || "Some error occurred getting tweets");
+  }
+});
 
 const deleteTweet = asyncHandler(async (req, res, next) => {});
 

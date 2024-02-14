@@ -42,7 +42,8 @@ import healthCheckRouter from "./routes/health.route.js";
 app.use("/api/v1/health", healthCheckRouter);
 
 import tweetRouter from "./routes/tweet.route.js";
-app.use("/api/v1/tweet", tweetRouter);
+// app.use("/api/v1/tweet", tweetRouter);
+app.use("/api/v1/tweets", tweetRouter);
 
 export { app };
 
