@@ -57,8 +57,35 @@ const getUserTweets = asyncHandler(async (req, res) => {
   }
 });
 
-const deleteTweet = asyncHandler(async (req, res, next) => {});
+const deleteTweet = asyncHandler(async (req, res, next) => {
+  try {
+  } catch (error) {}
+});
 
-const updateTweet = asyncHandler(async (req, res, next) => {});
+const updateTweet = asyncHandler(async (req, res, next) => {
+  try {
+    const { content } = req.body;
+    const userid = req.user._id;
+    if (!content)
+      throw new ApiError(400, "please provide tweet content to update");
+    if (!userid) throw new ApiError(400, "user not found");
+
+    const updatedTweet = await Tweet.findOneAndUpdate(
+      { _id: req.params.tweetId, owner: userid },
+      { content },
+      { new: true }
+    );
+
+    if (!updatedTweet) throw new ApiError(404, "tweet not found");
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, { updatedTweet }, "tweet updated successfully")
+      );
+  } catch (error) {
+    throw new ApiError(500, error.message || " update operation failed");
+  }
+});
 
 export { createTweet, getUserTweets, deleteTweet, updateTweet };
