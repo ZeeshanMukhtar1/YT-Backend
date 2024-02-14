@@ -39,7 +39,10 @@ import userRouter from "./routes/user.route.js";
 app.use("/api/v1/users", userRouter);
 
 import healthCheckRouter from "./routes/health.route.js";
-app.use("/api/v1/users/health", healthCheckRouter);
+app.use("/api/v1/health", healthCheckRouter);
+
+import tweetRouter from "./routes/tweet.route.js";
+app.use("/api/v1/tweet", tweetRouter);
 
 export { app };
 
