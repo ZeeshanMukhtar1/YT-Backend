@@ -59,7 +59,21 @@ const getUserTweets = asyncHandler(async (req, res) => {
 
 const deleteTweet = asyncHandler(async (req, res, next) => {
   try {
-  } catch (error) {}
+    const userid = req.user._id;
+    if (!userid) throw new ApiError(400, "user not found");
+    const tweet = await Tweet.findOneAndDelete({
+      _id: req.params.tweetId,
+      owner: userid,
+    });
+
+    if (!tweet) throw new ApiError(404, "tweet not found");
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, {}, "tweet deleted successfully"));
+  } catch (error) {
+    throw new ApiError(500, error.message || "delete operation failed");
+  }
 });
 
 const updateTweet = asyncHandler(async (req, res, next) => {
